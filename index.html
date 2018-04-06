@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8" />
+<style>
+    table {
+        width: 80%;
+        margin: 50px auto;
+        display: block;
+        border-collapse: collapse;
+    }
+    td {
+        border: 1px solid gray;
+        padding: 20px;
+    }
+</style>
+
+</head>
+<body>
+
+<style>
+p.data {
+    font-style: Monospace;
+    font-size: 25px;
+}
+</style>
+<script src="stat.js"></script>
+<div class='random'>
+    <p>min <input value="1" class="min"></p>
+    <p>max <input value="50" class="max"></p>
+    <p>N <input   value="20" class="num"></p>
+    <button class='rand'>randomize</button>
+    <button class='tally'>tally</button>
+    <p class='data'></p>
+    <p class="output"></p>
+    <script src="randomizer.js"></script>
+    <script>
+    {
+        let pdata = document.querySelector("div.random p.data");
+        let pout = document.querySelector("div.random p.output");
+        let btnRand = document.querySelector("div.random button.rand");
+        let btnTally = document.querySelector("div.random button.tally");
+        let inputNum = document.querySelector("div.random input.num");
+        let inputMax = document.querySelector("div.random input.max");
+        let inputMin = document.querySelector("div.random input.min");
+
+        let data = []
+        btnRand.onclick = function() {
+            data = randomizer.generate(
+                inputNum.value,
+                parseInt(inputMax.value) || null,
+                parseInt(inputMin.value) || null
+            );
+            let groups = randomizer.groupBy(Math.sqrt(inputNum.value)*2);
+            debugger;
+            pdata.textContent = groups 
+                    .map(r => `<p>${r}</p>`)
+                    .join(" ");
+            pout.innerHTML = "";
+        }
+        btnTally.onclick = function() {
+            let stat = new Stat(data);
+            let table = stat.createHtmlTable([
+                "c", "f"
+            ]);
+            pout.innerHTML = "";
+            pout.appendChild(table);
+        }
+    }
+    </script>
+</div>
+<table id="">
+</table>
+
+<hr>
+
+<table id='stat'>
+    <thead></thead>
+    <tbody></tbody>
+</table>
+
+<script>
+{
+    let data = [
+        201, 322, 453, 540, 124, 267, 390, 212,
+        342, 486, 129, 583, 127, 653, 489, 175,
+        649, 234, 568, 349, 389, 321, 680, 489,
+        623, 650, 357, 695, 405, 276, 395, 203,
+        458, 493, 145, 698, 340, 295, 601, 392,
+    ]
+    let table = document.querySelector("table#stat");
+    let tbody = table.querySelector("tbody");
+    let thead = table.querySelector("thead");
+
+    let stat = new Stat(data);
+    stat._length = 50;
+    stat.setFrequencies([ 5, 8, 2, 13, 7, 11, 4 ]);
+    stat.setClasses(0, 34, 7);
+
+    document.body.appendChild(stat.createHtmlTable());
+    
+    console.log("mean:", stat.mean());
+    stat = new Stat(data);
+    stat._length = 50;
+    stat.setFrequencies([5, 18, 12, 7, 8]);
+    stat.setClasses(118, 162, 5);
+
+    document.body.appendChild(stat.createHtmlTable(
+        [
+            "c", "f", "cm", "fcm", "m_x2",
+            ["f(Mi-Mean)2", function(stat) {
+                let f = stat.frequencies();
+                let m = stat.classMarks();
+                let mean = stat.mean();
+                let result = [];
+                for (let i = 0; i < stat.numClasses(); i++) {
+                    result[i] = f[i] * Math.pow(m[i] - mean, 2);
+                };
+                return result;
+            }],
+        ],
+        ["SD", "CV"],
+    ));
+
+    stat = new Stat(data);
+    stat.setFrequencies([2,5,8,13,7,11,4]);
+    stat.setClasses(0, 34, 7);
+    document.body.appendChild(stat.createHtmlTable(
+        [
+            "c", "f", "<cf",
+        ],
+        ["median", "mean", "modalFreq"],
+    ));
+
+
+    stat = new Stat(data);
+    stat.setFrequencies([5,8,2,13,7,11,4]);
+    stat.setClasses(0, 34, 7);
+    document.body.appendChild(stat.createHtmlTable(
+        [
+            "c", "f", "cm", "fcm", "mixq", "fmixq"
+        ],
+        ["mean", "variance", "SD", "CV", "VR"],
+    ));
+}
+</script>
+
+</body>
+</html>
